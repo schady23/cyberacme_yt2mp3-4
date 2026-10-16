@@ -1,0 +1,55 @@
+# Python environments and generated files
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+cookies.txt
+cookies*.txt
+*.cookies.txt
+*.log
+
+# Downloaded media and temporary conversion / preview artifacts
+/downloads/*
+!/downloads/.gitkeep
+/temp/*
+!/temp/.gitkeep
+*.part
+*.ytdl
+*.tar.gz
+*.zip
+
+# Local reference material and unused design experiments
+/Screenshot*.png
+/static/assets/*-prompt.txt
+/static/assets/oni-hologram.png
+
+# Editors, agent state, and operating system files
+.idea/
+.vscode/
+.agents/
+.codex/
+.aws/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~

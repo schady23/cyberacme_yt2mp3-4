@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#03051b">
+  <title>CyberAcme / Extract</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='crt.css') }}">
+  <script src="{{ url_for('static', filename='crt.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='oni.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body data-max-duration="{{ max_duration_seconds }}">
+  <a class="skip-link" href="#convert-form">Skip to controls</a>
+  <div class="ambient" aria-hidden="true"></div>
+  <div class="terminal-wall" aria-hidden="true">
+    <canvas id="crt-telemetry"></canvas>
+    <svg class="terminal-telemetry" viewBox="0 0 1440 900" preserveAspectRatio="none" fill="none">
+      <g stroke="currentColor" stroke-width="1">
+        <path d="M0 315h190m-140 10h190m-210 10h165m-160 10h215m-235 15h185M1055 235h190m-135 12h140m-182 12h205m-150 12h180M0 620h220m-170 12h160m-200 12h215" stroke-dasharray="3 6 14 5 3 8"/>
+        <path d="M1120 285h120v7h-120zm22 17h145v7h-145zm-40 17h115v7h-115zm50 18h145v7h-145zM55 390h120v7H55zm-20 18h170v7H35zm28 18h90v7H63z"/>
+        <path d="M220 95h45v180h-45M1280 405h55v120h-55M65 695h120m-100 12h160m-90 12h100" opacity=".4"/>
+      </g>
+    </svg>
+  </div>
+  <div class="oni-stage" id="oni-stage" aria-hidden="true">
+    <img id="oni-image" src="{{ url_for('static', filename='assets/oni-reference.png') }}" alt="" fetchpriority="high" decoding="async">
+    <canvas id="oni-canvas"></canvas>
+    <div class="oni-scan"></div>
+  </div>
+  <div class="dither-layer" aria-hidden="true"></div>
+  <div class="screen-lines" aria-hidden="true"></div>
+
+  <header class="masthead">
+    <a href="#" class="brand" aria-label="CyberAcme home"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M7 9h26v22H7zM2 15h36M2 25h36M15 3v34M25 3v34" stroke="currentColor" stroke-width="1.7"/><path d="M15 15h10v10H15z" fill="currentColor"/></svg><span>CyberAcme<sup>®</sup></span></a>
+    <span class="header-id">ONI / MEDIA SYSTEMS</span>
+    <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="true" aria-label="Interface motion">MOTION <span id="motion-state">ON</span><span aria-hidden="true">◉</span></button>
+  </header>
+
+  <main class="workspace">
+    <div class="intro"><h1>EXTRACT<span>_</span></h1></div>
+    <section class="console" id="console" aria-label="Media extraction">
+      <div class="console-surface" style="clip-path: url(#glass-clip)" aria-hidden="true"></div>
+      <svg class="console-glass" viewBox="0 0 1000 1000" preserveAspectRatio="none" fill="none" aria-hidden="true">
+        <defs>
+          <clipPath id="glass-clip" clipPathUnits="objectBoundingBox"><rect width="1" height="1"/></clipPath>
+          <linearGradient id="glass-edge" x1="0" y1="0" x2="1000" y2="1000" gradientUnits="userSpaceOnUse"><stop stop-color="#d3fff3" stop-opacity=".7"/><stop offset=".45" stop-color="#68cadd" stop-opacity=".2"/><stop offset="1" stop-color="#a8ff6d" stop-opacity=".65"/></linearGradient>
+        </defs>
+        <rect x="1" y="1" width="998" height="998" stroke="url(#glass-edge)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+        <path d="M1 45V1H45M955 999H999V955" stroke="#b9ffb0" stroke-width="2" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <div class="console-heading"><span class="console-id"><span class="led" aria-hidden="true"></span>CY / 07</span><span class="access-tag" id="access-tag">READY</span><span class="window-mark" aria-hidden="true">┐</span></div>
+      <form id="convert-form">
+        <fieldset id="job-controls"><legend class="sr-only">Extraction settings</legend>
+          <label for="url" class="field-label">SOURCE</label>
+          <div class="source-input-wrap"><input id="url" name="url" type="url" inputmode="url" placeholder="Paste a YouTube link" autocomplete="off" required><button id="inspect-button" class="inspect-button" type="button" aria-label="Load video title and duration">LOAD <span aria-hidden="true">↗</span></button></div>
+          <div id="source-info" class="source-info hidden" aria-live="polite"><strong id="source-title"></strong><span id="source-duration"></span></div>
+          <p id="inspect-error" class="inline-error hidden" role="alert"></p>
+          <div class="options-row">
+            <fieldset class="format-control"><legend class="sr-only">Output format</legend><div class="format-switch"><label><input type="radio" name="format" value="mp3" checked><span>MP3</span></label><label><input type="radio" name="format" value="mp4"><span>MP4</span></label></div></fieldset>
+            <fieldset class="mode-switch"><legend class="sr-only">Download range</legend><label><input type="radio" name="mode" value="full" checked><span>FULL</span></label><label><input type="radio" name="mode" value="section"><span>SECTION</span></label></fieldset>
+          </div>
+          <div class="trim-panel" id="trim-panel">
+            <div class="trim-topline"><span id="range-label">FULL LENGTH</span><span aria-hidden="true">[ IN : OUT ]</span></div>
+            <div class="trim-fields" id="trim-fields" hidden>
+              <div class="time-control"><label for="start-time">IN</label><input id="start-time" name="start_time" type="text" placeholder="22:22" value="00:00" maxlength="32" spellcheck="false" aria-describedby="time-help trim-error" disabled></div>
+              <span class="time-arrow" aria-hidden="true">→</span>
+              <div class="time-control"><label for="end-time">OUT</label><input id="end-time" name="end_time" type="text" placeholder="27:14" maxlength="32" spellcheck="false" aria-describedby="time-help trim-error" disabled></div>
+              <div class="duration-display"><span>LENGTH</span><output id="selection-duration" for="start-time end-time">—:—</output><small id="selection-caption" class="sr-only"></small></div>
+            </div>
+            <div class="timeline" id="timeline" data-ready="false"><div class="timeline-ruler" aria-hidden="true"></div><div class="timeline-window"></div><div class="timeline-center" id="timeline-prompt">FULL SOURCE</div><div id="timeline-controls" class="timeline-controls" hidden><label class="sr-only" for="start-slider">Section start in seconds</label><input type="range" id="start-slider" min="0" max="3600" step="0.1" value="0" disabled><label class="sr-only" for="end-slider">Section end in seconds</label><input type="range" id="end-slider" min="0" max="3600" step="0.1" value="3600" disabled><span class="trim-handle handle-start" aria-hidden="true"></span><span class="trim-handle handle-end" aria-hidden="true"></span></div></div>
+            <div class="timeline-labels" aria-hidden="true"><span>00:00</span><span id="timeline-mid">—</span><span id="timeline-end">END</span></div>
+            <div id="section-help" hidden><p id="time-help" class="input-note">MM:SS / HH:MM:SS / seconds</p><p id="trim-error" class="inline-error" aria-live="polite"></p><div class="trim-tools"><button type="button" data-length="30">+30s</button><button type="button" data-length="60">+1m</button><button type="button" data-length="120">+2m</button><button type="button" id="reset-range" aria-label="Reset section">↺</button></div></div>
+          </div>
+          <section class="metadata-panel" aria-labelledby="metadata-heading">
+            <div class="metadata-heading"><h2 id="metadata-heading">FILE DETAILS</h2><span>OPTIONAL</span></div>
+            <div class="metadata-grid">
+              <div class="metadata-field"><label for="metadata-title">TITLE / FILE NAME</label><input id="metadata-title" name="metadata_title" data-metadata="title" type="text" maxlength="255" placeholder="Use source title" autocomplete="off" aria-describedby="metadata-note"></div>
+              <div class="metadata-field"><label for="metadata-artist">ARTIST</label><input id="metadata-artist" name="metadata_artist" data-metadata="artist" type="text" maxlength="255" placeholder="Artist name" autocomplete="off"></div>
+            </div>
+            <details class="metadata-more">
+              <summary>MORE METADATA <span aria-hidden="true">+</span></summary>
+              <div class="metadata-grid">
+                <div class="metadata-field"><label for="metadata-album">ALBUM</label><input id="metadata-album" name="metadata_album" data-metadata="album" type="text" maxlength="255" autocomplete="off"></div>
+                <div class="metadata-field"><label for="metadata-album-artist">ALBUM ARTIST</label><input id="metadata-album-artist" name="metadata_album_artist" data-metadata="album_artist" type="text" maxlength="255" autocomplete="off"></div>
+                <div class="metadata-field"><label for="metadata-genre">GENRE</label><input id="metadata-genre" name="metadata_genre" data-metadata="genre" type="text" maxlength="255" autocomplete="off"></div>
+                <div class="metadata-field"><label for="metadata-year">YEAR</label><input id="metadata-year" name="metadata_year" data-metadata="year" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="2026" title="Four-digit year, for example 2026" autocomplete="off"></div>
+                <div class="metadata-field"><label for="metadata-track">TRACK</label><input id="metadata-track" name="metadata_track" data-metadata="track" type="text" inputmode="text" maxlength="9" pattern="[1-9][0-9]{0,3}(/[1-9][0-9]{0,3})?" placeholder="3 or 3/12" title="Positive track number, optionally with total, for example 3/12" autocomplete="off"></div>
+                <div class="metadata-field"><label for="metadata-disc">DISC</label><input id="metadata-disc" name="metadata_disc" data-metadata="disc" type="text" inputmode="text" maxlength="9" pattern="[1-9][0-9]{0,3}(/[1-9][0-9]{0,3})?" placeholder="1 or 1/2" title="Positive disc number, optionally with total, for example 1/2" autocomplete="off"></div>
+                <div class="metadata-field metadata-wide"><label for="metadata-composer">COMPOSER</label><input id="metadata-composer" name="metadata_composer" data-metadata="composer" type="text" maxlength="255" autocomplete="off"></div>
+                <div class="metadata-field metadata-wide"><label for="metadata-comment">COMMENT</label><textarea id="metadata-comment" name="metadata_comment" data-metadata="comment" maxlength="2000" rows="2"></textarea></div>
+              </div>
+            </details>
+            <p class="metadata-note" id="metadata-note">Blank fields keep source tags.</p>
+          </section>
+          <div class="output-readout"><span id="output-summary">MP3 / FULL</span><span id="output-note" class="sr-only"></span></div>
+          <button id="convert-button" class="convert-button" type="submit"><span id="convert-label">EXTRACT MP3</span><b aria-hidden="true">↗</b></button>
+        </fieldset>
+      </form>
+      <div id="status" class="status hidden" aria-live="polite"><div class="status-line"><strong id="status-label">Queued</strong><span id="status-percent">0%</span></div><div class="progress-track" id="progress-track" role="progressbar" aria-label="Extraction progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-bar" class="progress-bar"></div></div><ol class="job-stages" aria-label="Extraction stages"><li data-stage="inspecting">LOAD</li><li data-stage="downloading">EXTRACT</li><li data-stage="converting">PROCESS</li><li data-stage="saving">SAVE</li></ol><p id="status-detail" class="detail"></p></div>
+      <div id="result" class="result hidden" aria-live="polite"><span class="result-label">COMPLETE ✓</span><h2 id="result-title"></h2><p id="result-section"></p><p id="result-file" class="detail"></p><a id="download-link" class="button-link" href="#" download>SAVE MP3 ↗</a></div>
+      <div id="error" class="error hidden" role="alert"></div>
+      <div class="console-foot"><span>LOCAL OUTPUT</span><span>{% if max_minutes %}{{ max_minutes }} MIN MAX{% else %}NO DURATION LIMIT{% endif %}</span></div>
+    </section>
+  </main>
+  <footer class="footer"><span>CYBERACME SYSTEMS, INC.</span><span class="oni-state"><i class="led" aria-hidden="true"></i> ONI IS HERE.</span><span id="gaze-coordinates" aria-hidden="true">0500 : 0500</span></footer>
+  <div class="background-wordmark" aria-hidden="true">cyberacme</div>
+</body>
+</html>
